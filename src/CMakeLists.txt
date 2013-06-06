@@ -1,7 +1,15 @@
-include_directories(${QT_INCLUDES}
+if (WITH_KDE)
+    include_directories(${QT_INCLUDES}
+                    ${KDE4_INCLUDES}
                     ${PHONON_INCLUDES}
                     ${QJSON_INCLUDE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR})
+else (WITH_KDE)
+    include_directories(${QT_INCLUDES}
+                    ${PHONON_INCLUDES}
+                    ${QJSON_INCLUDE_DIR}
+                    ${CMAKE_CURRENT_BINARY_DIR})
+endif (WITH_KDE)
 
 set(grooveoff_SRCS grooveoff/utility.cpp
                    grooveoff/combobox.cpp
@@ -38,13 +46,24 @@ qt4_add_translation(grooveoff_I18N ${TRANSLATIONS})
 
 add_executable(grooveoff main.cpp ${grooveoff_SRCS} ${grooveoff_RC_SRCS} ${grooveoff_UI_HEADERS} ${grooveoff_I18N})
 
-target_link_libraries(grooveoff
+if (WITH_KDE)
+    target_link_libraries(grooveoff
+                      ${KDE4_KDEUI_LIBS}
                       ${QT_QTCORE_LIBRARY}
                       ${QT_QTGUI_LIBRARY}
                       ${QT_QTNETWORK_LIBRARY}
                       ${PHONON_LIBRARY}
                       ${QT_QTSVG_LIBRARY}
                       ${QJSON_LIBRARY})
+else (WITH_KDE)
+    target_link_libraries(grooveoff
+                      ${QT_QTCORE_LIBRARY}
+                      ${QT_QTGUI_LIBRARY}
+                      ${QT_QTNETWORK_LIBRARY}
+                      ${PHONON_LIBRARY}
+                      ${QT_QTSVG_LIBRARY}
+                      ${QJSON_LIBRARY})
+endif (WITH_KDE)
 
 install(TARGETS grooveoff RUNTIME DESTINATION bin)
 install(FILES ${grooveoff_I18N} DESTINATION share/grooveoff/translations/)

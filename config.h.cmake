@@ -1,2 +1,4 @@
 #define GROOVEOFF_VERSION "${GROOVEOFF_VERSION}"
 
+#cmakedefine CONFIG_USE_KDE
+

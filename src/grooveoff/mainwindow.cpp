@@ -16,6 +16,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
+// version include
+#include <config.h>
+
 #include "grooveoff/mainwindow.h"
 #include "grooveoff/audioplayer.h"
 #include "grooveoff/matcheslistmodel.h"
@@ -52,13 +56,16 @@
 #include <qjson/serializer.h>
 #include <qjson/parser.h>
 #include <QMovie>
+
+#ifdef CONFIG_USE_KDE
+#include <KMessageBox>
+#else
 #include <QMessageBox>
+#endif /* CONFIG_USE_KDE */
+
 #include <QApplication>
 #include <QCompleter>
 #include <QDirModel>
-
-// version include
-#include <config-version.h>
 
 Q_DECLARE_METATYPE(QList<int>)
 
@@ -655,20 +662,33 @@ void MainWindow::addDownloadItem(const QModelIndex &index)
 {
     // check if destination folder exists
     if(!QFile::exists(ui_->pathLine->text())) {
+
+#ifdef CONFIG_USE_KDE
+        KMessageBox::information(this, trUtf8("The destination folder does not exists.\n"
+                                              "Select a valid path"),
+                                       trUtf8("Attention"));
+#else
         QMessageBox::information(this, trUtf8("Attention"),
                                        trUtf8("The destination folder does not exists.\n"
                                               "Select a valid path"),
                                  QMessageBox::Ok);
+#endif
         return;
     }
 
     // check if destination folder is writable
     QFileInfo fi(ui_->pathLine->text());
     if(!fi.isWritable()) {
+#ifdef CONFIG_USE_KDE
+        KMessageBox::information(this, trUtf8("The destination folder is not writable.\n"
+                                              "Select a valid path"),
+                                       trUtf8("Attention"));
+#else
         QMessageBox::information(this, trUtf8("Attention"),
                                        trUtf8("The destination folder is not writable.\n"
                                               "Select a valid path"),
                                  QMessageBox::Ok);
+#endif
         return;
     }
 
@@ -679,12 +699,19 @@ void MainWindow::addDownloadItem(const QModelIndex &index)
 
     // check file existence
     if(QFile::exists(ui_->pathLine->text() + QDir::separator() + fileName + ".mp3")) {
+#ifdef CONFIG_USE_KDE
+        int ret = KMessageBox::questionYesNo(this,
+                                        trUtf8("A file named \"%1\" already exists. Are you sure you want to overwrite it?").arg(fileName),
+                                        trUtf8("Overwrite File?"));
+        if(ret == KMessageBox::Yes) {
+#else
         int ret = QMessageBox::question(this,
                                         trUtf8("Overwrite File?"),
                                         trUtf8("A file named \"%1\" already exists. Are you sure you want to overwrite it?").arg(fileName),
                                         QMessageBox::Yes | QMessageBox::Cancel,
                                         QMessageBox::Cancel);
         if(ret == QMessageBox::Yes) {
+#endif
             QFile::remove(ui_->pathLine->text() + QDir::separator() + fileName + ".mp3");
         } else {
             return;
@@ -1001,10 +1028,15 @@ bool MainWindow::isDownloadingQueued(const QString &id)
         GrooveOff::DownloadState state = qobject_cast<DownloadItem *>(ui_->downloadList->itemWidget(ui_->downloadList->item(i)))->downloadState();
         if(state != GrooveOff::DeletedState) {
             if(id == qobject_cast<DownloadItem *>(ui_->downloadList->itemWidget(ui_->downloadList->item(i)))->id()) {
+#ifdef CONFIG_USE_KDE
+                KMessageBox::information(this, trUtf8("A file with the same name is already in your download list."),
+                                               trUtf8("Download in progress"));
+#else
                 QMessageBox::information(this,
                                         trUtf8("Download in progress"),
                                         trUtf8("A file with the same name is already in your download list."),
                                         QMessageBox::Ok);
+#endif
                 return true;
             }
         }

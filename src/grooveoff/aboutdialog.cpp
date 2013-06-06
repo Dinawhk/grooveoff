@@ -21,7 +21,7 @@
 #include "ui_aboutdialog.h"
 
 // version include
-#include <config-version.h>
+#include <config.h>
 
 #include <QDesktopServices>
 #include <QUrl>
